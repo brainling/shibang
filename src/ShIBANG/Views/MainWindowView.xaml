@@ -1,0 +1,38 @@
+﻿<mah:MetroWindow x:Class="ShIBANG.Views.MainWindowView"
+                 x:ClassModifier="internal"
+                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+                 xmlns:views="clr-namespace:ShIBANG.Views"
+                 xmlns:controls="clr-namespace:ShIBANG.Controls"
+                 xmlns:converters="clr-namespace:ShIBANG.Converters"
+                 Title="Should I Buy a New Game?" Height="500" Width="750"
+                 RightWindowCommandsOverlayBehavior="Never">
+    <mah:MetroWindow.Resources>
+        <converters:BooleanToConnectedBrushConverter x:Key="BooleanToConnectedBrush" />
+    </mah:MetroWindow.Resources>
+    <mah:MetroWindow.RightWindowCommands>
+        <mah:WindowCommands>
+            <Button ToolTip="Settings" Command="{Binding ShowSettings}">
+                <controls:FontImage Glyph="{DynamicResource GearIcon}" Brush="White" />
+            </Button>
+        </mah:WindowCommands>
+    </mah:MetroWindow.RightWindowCommands>
+    <DockPanel>
+        <StatusBar DockPanel.Dock="Bottom" Height="20">
+            <StatusBarItem HorizontalAlignment="Right">
+                <controls:FontImage Glyph="{DynamicResource WifiIcon}" Width="16" Height="16"
+                                    Brush="{Binding IsSearchReady, Converter={StaticResource BooleanToConnectedBrush}}"
+                                    ToolTip="{Binding SearchReadinessMessage}" />
+            </StatusBarItem>
+        </StatusBar>
+        <TabControl>
+            <TabItem Header="Home">
+                <controls:ViewPlaceholder ViewType="views:HomeView" />
+            </TabItem>
+            <TabItem Header="Games">
+                <controls:ViewPlaceholder ViewType="views:GamesView" />
+            </TabItem>
+        </TabControl>
+    </DockPanel>
+</mah:MetroWindow>

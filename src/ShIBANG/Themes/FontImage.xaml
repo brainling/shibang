@@ -1,0 +1,8 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls1="clr-namespace:ShIBANG.Controls">
+    <Style TargetType="controls1:FontImage">
+        <Setter Property="FontFamily" Value="/ShIBANG;component/Fonts/#FontAwesome"></Setter>
+    </Style>
+</ResourceDictionary>

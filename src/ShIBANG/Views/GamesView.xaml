@@ -1,0 +1,69 @@
+﻿<UserControl x:Class="ShIBANG.Views.GamesView"
+             x:ClassModifier="internal"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:ShIBANG.Controls"
+             xmlns:converters="clr-namespace:ShIBANG.Converters">
+    <UserControl.Resources>
+        <converters:StringNullOrWhiteSpaceToVisibility x:Key="StringNullOrWhiteSpaceToVisibility" />
+    </UserControl.Resources>
+    <DockPanel>
+        <ToolBarTray DockPanel.Dock="Top">
+            <ToolBar>
+                <Button Width="24" Height="24" Command="{Binding AddGame}">
+                    <controls:FontImage Glyph="{DynamicResource PlusIcon}" Brush="ForestGreen" />
+                </Button>
+                <Button Width="24" Height="24" Command="{Binding EditGame}">
+                    <controls:FontImage Glyph="{DynamicResource PencilIcon}" Brush="Goldenrod" />
+                </Button>
+                <Separator />
+                <Button Width="24" Height="24" Command="{Binding RemoveGame}">
+                    <controls:FontImage Glyph="{DynamicResource RemoveIcon}" Brush="DarkRed" />
+                </Button>
+            </ToolBar>
+        </ToolBarTray>
+        <DataGrid AutoGenerateColumns="False" ItemsSource="{Binding Games}" SelectedItem="{Binding SelectedGame}" CanUserAddRows="False">            
+            <DataGrid.Columns>
+                <DataGridTemplateColumn IsReadOnly="True" Width="24">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Image Width="20" Height="20" Source="{Binding ThumbnailImageUrl}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn FontSize="14" FontFamily="Segoe UI Semibold" Header="Game" Binding="{Binding Name}" IsReadOnly="True" Width="275" />
+                <DataGridTemplateColumn Header="Completion" SortMemberPath="CompletionPercent">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <ProgressBar Value="{Binding CompletionPercent}" Maximum="100" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn>
+                    <DataGridTemplateColumn.HeaderTemplate>
+                        <DataTemplate>
+                            <controls:FontImage Glyph="{DynamicResource BombIcon}" Width="16" Height="16" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.HeaderTemplate>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock HorizontalAlignment="Center"
+                                       Visibility="{Binding GiantBombUrl, Converter={StaticResource StringNullOrWhiteSpaceToVisibility}}">
+                                <controls:WebHyperlink NavigateUri="{Binding GiantBombUrl}">
+                                    <controls:FontImage Glyph="{DynamicResource LinkIcon}" Width="16" Height="16" />
+                                </controls:WebHyperlink>
+                            </TextBlock>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn>
+                    <DataGridTemplateColumn.HeaderTemplate>
+                        <DataTemplate>
+                            <controls:FontImage Glyph="{DynamicResource SteamIcon}" Width="16" Height="16" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.HeaderTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+    </DockPanel>
+</UserControl>

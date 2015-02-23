@@ -20,6 +20,13 @@
     </mah:MetroWindow.RightWindowCommands>
     <DockPanel>
         <StatusBar DockPanel.Dock="Bottom" Height="20">
+            <StatusBarItem HorizontalAlignment="Left">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock FontSize="12" Text="Should I?" VerticalAlignment="Center" Margin="0,0,4,0" />
+                    <controls:FontImage Glyph="{DynamicResource CircleIcon}" Brush="{Binding ShouldI.Brush}" 
+                                        ToolTip="{Binding ShouldI.Message}" />
+                </StackPanel>
+            </StatusBarItem>
             <StatusBarItem HorizontalAlignment="Right">
                 <controls:FontImage Glyph="{DynamicResource WifiIcon}" Width="16" Height="16"
                                     Brush="{Binding IsSearchReady, Converter={StaticResource BooleanToConnectedBrush}}"

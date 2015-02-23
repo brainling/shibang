@@ -26,19 +26,46 @@
 
 #endregion
 
+using System;
+using System.Linq;
 using System.Windows.Input;
+using System.Windows.Media;
 using Microsoft.Practices.Prism.PubSubEvents;
 using ShIBANG.Services;
 using ShIBANG.Views;
 
 namespace ShIBANG.ViewModels {
+    public class ShouldIState {
+        public string Message { get; set; }
+        public Brush Brush { get; set; }
+    }
+
     public class MainWindowViewModel : ViewModelBase {
+        private static readonly ShouldIState[] States = new ShouldIState[] {
+            new ShouldIState {
+                Brush = Brushes.ForestGreen,
+                Message = "Your back log is looking pretty clear. You could stand to buy a new game."
+            },
+            new ShouldIState {
+                Brush = Brushes.Goldenrod,
+                Message = "You have plenty you could be playing, but another game wouldn't hurt either."
+            },
+            new ShouldIState {
+                Brush = Brushes.DarkRed,
+                Message = "No. Just no. Stop. Put the credit card down."
+            }
+        };
+
         private bool _isSearchReady;
         private string _searchReadinessMessage;
+        private ShouldIState _shouldI;
         private readonly IFlyoutService _flyoutService;
+        private readonly IStorageService _storageService;
 
-        public MainWindowViewModel (IFlyoutService flyoutService, IEventAggregator eventAggregator, IGameSourceService gameSourceService) {
-            _flyoutService = flyoutService;            
+        public MainWindowViewModel (IFlyoutService flyoutService, IEventAggregator eventAggregator, IGameSourceService gameSourceService,
+            IStorageService storageService) {
+            _flyoutService = flyoutService;
+            _storageService = storageService;
             eventAggregator.GetEvent<SearchReadinessUpdated> ().Subscribe (sr => { IsSearchReady = sr; }, true);
 
             WhenStateUpdated (() => IsSearchReady, () => {
@@ -46,6 +73,7 @@ namespace ShIBANG.ViewModels {
                     "GiantBomb search is NOT ready. Please senter an API key in the settings or check your internet connection.";
             });
             IsSearchReady = gameSourceService.IsReady;
+            CalculateTotalCompletion ();
         }
 
         public ICommand ShowSettings {
@@ -62,8 +90,27 @@ namespace ShIBANG.ViewModels {
             set { SetProperty (ref _searchReadinessMessage, value); }
         }
 
+        public ShouldIState ShouldI {
+            get { return _shouldI; }
+            set { SetProperty (ref _shouldI, value); }
+        }
+
         private void ExecuteShowSettings () {
             _flyoutService.ShowFlyout ("Settings", App.Current.Container.GetInstance<SettingsView> ());
+        }
+
+        private void CalculateTotalCompletion () {
+            var comp = _storageService.Games.Sum (g => Math.Max (0.0, Math.Min (1.0, g.CompletionPercent / 100.0f)));
+            var percent = (comp / _storageService.Games.Count) * 100.0;
+            if (percent <= 25.0) {
+                ShouldI = States[2];
+            }
+            else if (percent <= 65.0) {
+                ShouldI = States[1];
+            }
+            else {
+                ShouldI = States[0];
+            }
         }
     }
 }

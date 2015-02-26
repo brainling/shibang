@@ -22,7 +22,8 @@
                 </Button>
             </ToolBar>
         </ToolBarTray>
-        <DataGrid AutoGenerateColumns="False" ItemsSource="{Binding Games}" SelectedItem="{Binding SelectedGame}" CanUserAddRows="False">            
+        <DataGrid AutoGenerateColumns="False" ItemsSource="{Binding Games}" SelectedItem="{Binding SelectedGame}" CanUserAddRows="False"
+                  CellEditEnding="DataGrid_OnCellEditEnding">
             <DataGrid.Columns>
                 <DataGridTemplateColumn IsReadOnly="True" Width="24">
                     <DataGridTemplateColumn.CellTemplate>
@@ -31,13 +32,29 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn FontSize="14" FontFamily="Segoe UI Semibold" Header="Game" Binding="{Binding Name}" IsReadOnly="True" Width="275" />
-                <DataGridTemplateColumn Header="Completion" SortMemberPath="CompletionPercent">
+                <DataGridTextColumn FontSize="14" FontFamily="Segoe UI Semibold" Header="Game" Binding="{Binding Name}" IsReadOnly="True"
+                                    Width="275" />
+                <DataGridTemplateColumn Header="Completion" SortMemberPath="CompletionPercent" Width="175">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <ProgressBar Value="{Binding CompletionPercent}" Maximum="100" />
+                            <DockPanel>
+                                <TextBlock DockPanel.Dock="Right" Width="30" Text="{Binding CompletionPercent, StringFormat={}{0:0}%}"
+                                           Margin="3,0,0,0" />
+                                <ProgressBar Value="{Binding CompletionPercent}" Maximum="100" />
+                            </DockPanel>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate>
+                            <DockPanel>
+                                <TextBlock DockPanel.Dock="Right" Width="30" Text="{Binding CompletionPercent, StringFormat={}{0:00}%}"
+                                           Margin="3,0,0,0" />
+                                <Slider Minimum="0" Maximum="100" Value="{Binding CompletionPercent, UpdateSourceTrigger=PropertyChanged}"
+                                        IsSnapToTickEnabled="True"
+                                        TickFrequency="5" Height="20" Margin="0,0,0,2" />
+                            </DockPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTemplateColumn>
                     <DataGridTemplateColumn.HeaderTemplate>

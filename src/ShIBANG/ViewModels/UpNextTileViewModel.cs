@@ -26,39 +26,7 @@
 
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Windows.Input;
-using Microsoft.Practices.Prism.Commands;
-using ShIBANG.Models;
-
 namespace ShIBANG.ViewModels {
-    internal abstract class ViewModelBase : ModelBase {
-        private readonly Dictionary<string, DelegateCommandBase> _commands = new Dictionary<string, DelegateCommandBase> ();
-
-        protected ViewModelBase () {
-            CommandManager.RequerySuggested += (o, e) => { _commands.Values.ToList ().ForEach (c => c.RaiseCanExecuteChanged ()); };
-        }
-
-        protected ICommand GetCommand (string name, Action execute, Func<bool> canExecute = null) {
-            if (!_commands.ContainsKey (name)) {
-                _commands[name] = canExecute == null
-                    ? new DelegateCommand (execute)
-                    : new DelegateCommand (execute, canExecute);
-            }
-
-            return _commands[name];
-        }
-
-        protected ICommand GetCommand<TCommand> (string name, Action<TCommand> execute, Func<TCommand, bool> canExecute = null) {
-            if (!_commands.ContainsKey (name)) {
-                _commands[name] = canExecute == null
-                    ? new DelegateCommand<TCommand> (execute)
-                    : new DelegateCommand<TCommand> (execute, canExecute);
-            }
-
-            return _commands[name];
-        }
+    internal class UpNextTileViewModel {
     }
 }

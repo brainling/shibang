@@ -26,39 +26,17 @@
 
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Windows.Input;
-using Microsoft.Practices.Prism.Commands;
-using ShIBANG.Models;
+using System.Windows.Controls;
+using ShIBANG.ViewModels;
 
-namespace ShIBANG.ViewModels {
-    internal abstract class ViewModelBase : ModelBase {
-        private readonly Dictionary<string, DelegateCommandBase> _commands = new Dictionary<string, DelegateCommandBase> ();
-
-        protected ViewModelBase () {
-            CommandManager.RequerySuggested += (o, e) => { _commands.Values.ToList ().ForEach (c => c.RaiseCanExecuteChanged ()); };
-        }
-
-        protected ICommand GetCommand (string name, Action execute, Func<bool> canExecute = null) {
-            if (!_commands.ContainsKey (name)) {
-                _commands[name] = canExecute == null
-                    ? new DelegateCommand (execute)
-                    : new DelegateCommand (execute, canExecute);
-            }
-
-            return _commands[name];
-        }
-
-        protected ICommand GetCommand<TCommand> (string name, Action<TCommand> execute, Func<TCommand, bool> canExecute = null) {
-            if (!_commands.ContainsKey (name)) {
-                _commands[name] = canExecute == null
-                    ? new DelegateCommand<TCommand> (execute)
-                    : new DelegateCommand<TCommand> (execute, canExecute);
-            }
-
-            return _commands[name];
+namespace ShIBANG.Views {
+    /// <summary>
+    /// Interaction logic for NeglectedTileView.xaml
+    /// </summary>
+    internal partial class NeglectedTileView : UserControl {
+        public NeglectedTileView (NeglectedTileViewModel vm) {
+            DataContext = vm;
+            InitializeComponent ();
         }
     }
 }

@@ -41,6 +41,7 @@ namespace ShIBANG {
             serviceRegistry.Register<ISettingsService, SettingsService> (new PerContainerLifetime ());
             serviceRegistry.Register<IGameSourceService, GameSourceService> (new PerContainerLifetime ());
             serviceRegistry.Register<IStorageService, StorageService> (new PerContainerLifetime ());
+            serviceRegistry.Register<IGamesService, GamesService> (new PerContainerLifetime ());
             serviceRegistry.Register<IFlyoutService, FlyoutService> (new PerContainerLifetime ());
 
             #endregion
@@ -61,6 +62,15 @@ namespace ShIBANG {
 
             serviceRegistry.Register<SettingsViewModel> ();
             serviceRegistry.Register<SettingsView> ();
+
+            serviceRegistry.Register<CurrentlyPlayingTileViewModel> ();
+            serviceRegistry.Register<CurrentlyPlayingTileView> ();
+
+            serviceRegistry.Register<UpNextTileViewModel> ();
+            serviceRegistry.Register<UpNextTileView> ();
+
+            serviceRegistry.Register<NeglectedTileViewModel> ();
+            serviceRegistry.Register<NeglectedTileView> ();
 
             #endregion
         }

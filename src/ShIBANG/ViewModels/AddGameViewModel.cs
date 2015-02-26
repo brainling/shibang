@@ -33,18 +33,18 @@ using ShIBANG.Models;
 using ShIBANG.Services;
 
 namespace ShIBANG.ViewModels {
-    public class AddGameViewModel : ViewModelBase, IFlyoutViewModel {
-        private IFlyoutService _flyoutService;
+    internal class AddGameViewModel : ViewModelBase, IFlyoutViewModel {
         private bool _hasExistingGame;
         private bool _hasNewGame;
         private bool _linkToSteam = true;
         private Game _newGame;
         private string _searchText;
         private GameResult _selectedGame;
-        private readonly IStorageService _storageService;
+        private readonly IFlyoutService _flyoutService;
+        private readonly IGamesService _gamesService;
 
-        public AddGameViewModel (IStorageService storageService, IFlyoutService flyoutService) {
-            _storageService = storageService;
+        public AddGameViewModel (IGamesService gamesService, IFlyoutService flyoutService) {
+            _gamesService = gamesService;
             _flyoutService = flyoutService;
             WhenStateUpdated (() => SelectedGame, () => {
                 if (SelectedGame == null) {
@@ -52,7 +52,7 @@ namespace ShIBANG.ViewModels {
                 }
 
                 HasExistingGame = false;
-                if (storageService.Games.Any (g => String.Equals (g.Name, SelectedGame.Name, StringComparison.InvariantCultureIgnoreCase))) {
+                if (gamesService.Games.Any (g => String.Equals (g.Name, SelectedGame.Name, StringComparison.InvariantCultureIgnoreCase))) {
                     HasExistingGame = true;
                 }
                 else {
@@ -105,8 +105,9 @@ namespace ShIBANG.ViewModels {
         }
 
         public void ExecuteAddGame () {
-            _storageService.Games.Add (NewGame);
+            _gamesService.Games.Add (NewGame);
             _flyoutService.CloseFlyout ("AddGame");
+            NewGame = null;
         }
     }
 }

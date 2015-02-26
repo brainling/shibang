@@ -28,35 +28,56 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
+using System.Data.Entity;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using Humanizer;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
-using ShIBANG.Models;
+using ShIBANG.Storage;
 
 namespace ShIBANG.Services {
     public interface IStorageService {
-        IList<Game> Games { get; }
-        IList<Category> Categories { get; }
+        IEnumerable<TObject> LoadObjects<TObject> ();
+        void SaveObjects<TObject> (IEnumerable<TObject> objects);
     }
 
     internal class StorageService : IStorageService {
-        private ObservableCollection<Category> _categories;
-        private ObservableCollection<Game> _games;
-        private ISettingsService _settingsService;
+        private readonly ISettingsService _settingsService;
+        private readonly Dictionary<int, string> _databaseVersionUpdates = new Dictionary<int, string> {
+            { 0, "CreateDatabase.sql" }
+        };
 
         public StorageService (ISettingsService settingsService) {
             _settingsService = settingsService;
+
+            using (var ctx = new StorageContext (String.Format ("Data Source={0}", Path.Combine (EnsureFolder (), "storage.db")))) {
+                var version = ctx.Database.SqlQuery<int> ("PRAGMA user_version;").Single ();
+                UpdateDatabase (ctx, version);
+            }
         }
 
-        public IList<Game> Games {
-            get { return _games ?? (_games = LoadObjects<Game> ()); }
+        public IEnumerable<TObject> LoadObjects<TObject> () {
+            using (var reader = new StreamReader (ObjectsFile<TObject> ())) {
+                return JsonConvert.DeserializeObject<List<TObject>> (reader.ReadToEnd (), new JsonSerializerSettings {
+                    ContractResolver = new CamelCasePropertyNamesContractResolver ()
+                });
+            }
         }
 
-        public IList<Category> Categories {
-            get { return _categories ?? (_categories = LoadObjects<Category> ()); }
+        public void SaveObjects<TObject> (IEnumerable<TObject> objects) {
+            var file = ObjectsFile<TObject> ();
+            if (_settingsService.Get ().BackupDataOnSave && File.Exists (file)) {
+                File.Copy (file, String.Format ("{0}.bak", file), true);
+            }
+
+            using (var writer = new StreamWriter (ObjectsFile<TObject> (), false)) {
+                writer.WriteLine (JsonConvert.SerializeObject (objects, Formatting.Indented, new JsonSerializerSettings {
+                    ContractResolver = new CamelCasePropertyNamesContractResolver (),
+                    NullValueHandling = NullValueHandling.Ignore
+                }));
+            }
         }
 
         private static string EnsureFolder () {
@@ -87,31 +108,19 @@ namespace ShIBANG.Services {
             return file;
         }
 
-        private void ObjectsCollectionChanged<TObject> (object sender, NotifyCollectionChangedEventArgs e) {
-            var file = ObjectsFile<TObject> ();
-            if (_settingsService.Get ().BackupDataOnSave && File.Exists (file)) {
-                File.Copy (file, String.Format ("{0}.bak", file), true);
-            }
-
-            using (var writer = new StreamWriter (ObjectsFile<TObject> (), false)) {
-                writer.WriteLine (JsonConvert.SerializeObject ((IList<TObject>) sender, Formatting.Indented, new JsonSerializerSettings {
-                    ContractResolver = new CamelCasePropertyNamesContractResolver (),
-                    NullValueHandling = NullValueHandling.Ignore
-                }));
+        private string GetUpdateSource (string name) {
+            using (var reader = new StreamReader (Assembly.GetExecutingAssembly ().GetManifestResourceStream (String.Format ("ShIBANG.Storage.{0}", name)))) {
+                return reader.ReadToEnd ();
             }
         }
 
-        private ObservableCollection<TObject> LoadObjects<TObject> () {
-            ObservableCollection<TObject> objects;
-            using (var reader = new StreamReader (ObjectsFile<TObject> ())) {
-                objects = new ObservableCollection<TObject> (JsonConvert.DeserializeObject<List<TObject>> (reader.ReadToEnd (), new JsonSerializerSettings {
-                    ContractResolver = new CamelCasePropertyNamesContractResolver ()
-                }));
+        private void UpdateDatabase (DbContext ctx, int currentVersion) {
+            if (_databaseVersionUpdates.ContainsKey (currentVersion)) {
+                var sql = GetUpdateSource (_databaseVersionUpdates[currentVersion]);
+                ctx.Database.ExecuteSqlCommand (sql);
+                ctx.Database.ExecuteSqlCommand (String.Format ("PRAGMA user_version = {0};", currentVersion + 1));
+                UpdateDatabase (ctx, currentVersion + 1);
             }
-
-            objects.CollectionChanged += ObjectsCollectionChanged<TObject>;
-
-            return objects;
         }
     }
 }

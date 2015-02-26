@@ -31,6 +31,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GiantBomb.Api;
+using GiantBomb.Api.Model;
 using Microsoft.Practices.Prism.PubSubEvents;
 using ShIBANG.Models;
 
@@ -76,10 +77,26 @@ namespace ShIBANG.Services {
                     Id = g.Id,
                     SiteUrl = g.SiteDetailUrl,
                     Name = g.Name,
-                    ThumbnailImageUrl = g.Image == null ? DefaultImage : g.Image.TinyUrl,
-                    MediumImageUrl = g.Image == null ? DefaultImage : g.Image.MediumUrl
+                    ThumbnailImageUrl = GetThumbnailImage (g.Image),
+                    MediumImageUrl = GetMediumImage (g.Image)
                 });
             });
+        }
+
+        private static string GetThumbnailImage (Image image) {
+            if (image == null) {
+                return DefaultImage;
+            }
+
+            return image.TinyUrl ?? image.SmallUrl ?? image.MediumUrl ?? image.ThumbUrl ?? DefaultImage;
+        }
+
+        private static string GetMediumImage (Image image) {
+            if (image == null) {
+                return DefaultImage;
+            }
+
+            return image.MediumUrl ?? image.ThumbUrl ?? image.SmallUrl ?? DefaultImage;
         }
     }
 }

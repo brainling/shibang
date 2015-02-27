@@ -5,5 +5,6 @@
         <ResourceDictionary Source="/ShIBANG;component/Fonts/Icons.xaml" />
         <ResourceDictionary Source="/ShIBANG;component/Themes/FontImage.xaml" />
         <ResourceDictionary Source="/ShIBANG;component/Themes/GameSearchBox.xaml" />
+        <ResourceDictionary Source="/ShIBANG;component/Themes/SimpleGameList.xaml" />
     </ResourceDictionary.MergedDictionaries>
 </ResourceDictionary>

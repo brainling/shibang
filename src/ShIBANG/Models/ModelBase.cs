@@ -28,37 +28,28 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Windows.Input;
-using Microsoft.Practices.Prism.Commands;
-using ShIBANG.Models;
+using System.Linq.Expressions;
+using Microsoft.Practices.Prism.Mvvm;
 
-namespace ShIBANG.ViewModels {
-    internal abstract class ViewModelBase : ModelBase {
-        private readonly Dictionary<string, DelegateCommandBase> _commands = new Dictionary<string, DelegateCommandBase> ();
+namespace ShIBANG.Models {
+    public abstract class ModelBase : BindableBase {
+        private readonly Dictionary<string, List<Action>> _stateHandlers = new Dictionary<string, List<Action>> ();
 
-        protected ViewModelBase () {
-            CommandManager.RequerySuggested += (o, e) => { _commands.Values.ToList ().ForEach (c => c.RaiseCanExecuteChanged ()); };
+        protected ModelBase () {
+            PropertyChanged += (o, e) => {
+                if (_stateHandlers.ContainsKey (e.PropertyName)) {
+                    _stateHandlers[e.PropertyName].ForEach (a => a ());
+                }
+            };
         }
 
-        protected ICommand GetCommand (string name, Action execute, Func<bool> canExecute = null) {
-            if (!_commands.ContainsKey (name)) {
-                _commands[name] = canExecute == null
-                    ? new DelegateCommand (execute)
-                    : new DelegateCommand (execute, canExecute);
+        protected void WhenStateUpdated<TProperty> (Expression<Func<TProperty>> property, Action action) {
+            var name = PropertySupport.ExtractPropertyName (property);
+            if (!_stateHandlers.ContainsKey (name)) {
+                _stateHandlers[name] = new List<Action> ();
             }
 
-            return _commands[name];
-        }
-
-        protected ICommand GetCommand<TCommand> (string name, Action<TCommand> execute, Func<TCommand, bool> canExecute = null) {
-            if (!_commands.ContainsKey (name)) {
-                _commands[name] = canExecute == null
-                    ? new DelegateCommand<TCommand> (execute)
-                    : new DelegateCommand<TCommand> (execute, canExecute);
-            }
-
-            return _commands[name];
+            _stateHandlers[name].Add (action);
         }
     }
 }

@@ -26,21 +26,31 @@
 
 #endregion
 
+using System;
+
 namespace ShIBANG.Models {
-    public class Game {
+    public class Game : ModelBase {
+        private float _completionPercent;
+
         public Game () {
             IsActivelyPlaying = true;
         }
 
+        public float CompletionPercent {
+            get { return _completionPercent; }
+            set { SetProperty (ref _completionPercent, value); }
+        }
+
         public int Id { get; set; }
         public string Name { get; set; }
-        public float CompletionPercent { get; set; }
         public bool IsActivelyPlaying { get; set; }
+        public bool IsPersistent { get; set; }
         public int Rating { get; set; }
         public int GiantBombId { get; set; }
         public string GiantBombUrl { get; set; }
         public string SteamId { get; set; }
         public string ThumbnailImageUrl { get; set; }
         public string MediumImageUrl { get; set; }
+        public DateTime LastUpdated { get; set; }
     }
 }

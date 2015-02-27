@@ -35,12 +35,12 @@ using ShIBANG.Services;
 using ShIBANG.Views;
 
 namespace ShIBANG.ViewModels {
-    public class ShouldIState {
+    internal class ShouldIState {
         public string Message { get; set; }
         public Brush Brush { get; set; }
     }
 
-    public class MainWindowViewModel : ViewModelBase {
+    internal class MainWindowViewModel : ViewModelBase {
         private static readonly ShouldIState[] States = new ShouldIState[] {
             new ShouldIState {
                 Brush = Brushes.ForestGreen,
@@ -60,20 +60,23 @@ namespace ShIBANG.ViewModels {
         private string _searchReadinessMessage;
         private ShouldIState _shouldI;
         private readonly IFlyoutService _flyoutService;
-        private readonly IStorageService _storageService;
+        private readonly IGamesService _gamesService;
 
         public MainWindowViewModel (IFlyoutService flyoutService, IEventAggregator eventAggregator, IGameSourceService gameSourceService,
-            IStorageService storageService) {
+            IGamesService gamesService) {
             _flyoutService = flyoutService;
-            _storageService = storageService;
+            _gamesService = gamesService;
+
             eventAggregator.GetEvent<SearchReadinessUpdated> ().Subscribe (sr => { IsSearchReady = sr; }, true);
+            eventAggregator.GetEvent<GameCompletionUpdated> ().Subscribe (game => { CalculateShouldIStatus (); });
+            eventAggregator.GetEvent<GameListUpdated> ().Subscribe (game => { CalculateShouldIStatus (); });
 
             WhenStateUpdated (() => IsSearchReady, () => {
                 SearchReadinessMessage = IsSearchReady ? "GiantBomb search is ready." :
                     "GiantBomb search is NOT ready. Please senter an API key in the settings or check your internet connection.";
             });
             IsSearchReady = gameSourceService.IsReady;
-            CalculateTotalCompletion ();
+            CalculateShouldIStatus ();
         }
 
         public ICommand ShowSettings {
@@ -99,13 +102,13 @@ namespace ShIBANG.ViewModels {
             _flyoutService.ShowFlyout ("Settings", App.Current.Container.GetInstance<SettingsView> ());
         }
 
-        private void CalculateTotalCompletion () {
-            var comp = _storageService.Games.Sum (g => Math.Max (0.0, Math.Min (1.0, g.CompletionPercent / 100.0f)));
-            var percent = (comp / _storageService.Games.Count) * 100.0;
-            if (percent <= 25.0) {
+        private void CalculateShouldIStatus () {
+            var comp = _gamesService.Games.Sum (g => Math.Max (0.0, Math.Min (1.0, g.CompletionPercent / 100.0f)));
+            var percent = (comp / _gamesService.Games.Count) * 100.0;
+            if (percent <= 45.0) {
                 ShouldI = States[2];
             }
-            else if (percent <= 65.0) {
+            else if (percent <= 75.0) {
                 ShouldI = States[1];
             }
             else {

@@ -1,0 +1,46 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="clr-namespace:ShIBANG.Controls">
+    <Style TargetType="controls:SimpleGameList">
+        <Setter Property="ItemsPanel">
+            <Setter.Value>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel />
+                </ItemsPanelTemplate>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="ItemTemplate">
+            <Setter.Value>
+                <DataTemplate>
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="10*" MinWidth="25" />
+                            <ColumnDefinition Width="75*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="1" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <Border Grid.ColumnSpan="2" Height="1" Width="Auto" Margin="40,0,40,0" BorderBrush="{DynamicResource GrayNormalBrush}" BorderThickness="1" />
+                        
+                        <Image Grid.Row="1" MinWidth="20" Width="20" Height="20" Source="{Binding ThumbnailImageUrl}" Margin="0,10,5,0" />
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Name}" FontSize="12" Margin="0,10,0,0"
+                                   TextTrimming="CharacterEllipsis" Foreground="{DynamicResource IdealForegroundColorBrush}" />
+                    </Grid>
+                </DataTemplate>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="controls:SimpleGameList">
+                    <Border Background="{TemplateBinding Background}">
+                        <ScrollViewer Padding="{TemplateBinding Control.Padding}" Focusable="False" VerticalScrollBarVisibility="Auto">
+                            <ItemsPresenter SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}" />
+                        </ScrollViewer>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+</ResourceDictionary>

@@ -27,6 +27,7 @@
 #endregion
 
 using System.Windows.Controls;
+using ShIBANG.Models;
 using ShIBANG.ViewModels;
 
 namespace ShIBANG.Views {
@@ -37,6 +38,10 @@ namespace ShIBANG.Views {
         public GamesView (GamesViewModel vm) {
             DataContext = vm;
             InitializeComponent ();
+        }
+
+        private void DataGrid_OnCellEditEnding (object sender, DataGridCellEditEndingEventArgs e) {
+            ((GamesViewModel) DataContext).SaveGame (e.Row.Item as Game);
         }
     }
 }

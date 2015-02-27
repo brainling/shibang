@@ -30,9 +30,19 @@ using Microsoft.Practices.Prism.PubSubEvents;
 using ShIBANG.Models;
 
 namespace ShIBANG {
+    public static class Events {
+        public static readonly object EmptyArg = new object ();
+    }
+
     public class SettingsUpdated : PubSubEvent<Settings> {
     }
 
-    public class SearchReadinessUpdated : PubSubEvent<bool> {        
+    public class SearchReadinessUpdated : PubSubEvent<bool> {
+    }
+
+    public class GameCompletionUpdated : PubSubEvent<Game> {
+    }
+
+    public class GameListUpdated : PubSubEvent<object> {
     }
 }

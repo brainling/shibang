@@ -40,11 +40,11 @@ namespace ShIBANG.ViewModels {
         private bool _isSearchReady;
         private Game _selectedGame;
         private readonly IFlyoutService _flyoutService;
-        private readonly IStorageService _storageService;
+        private readonly IGamesService _gamesService;
 
-        public GamesViewModel (IStorageService storageService, IFlyoutService flyoutService, IGameSourceService gameSourceService,
+        public GamesViewModel (IGamesService gamesService, IFlyoutService flyoutService, IGameSourceService gameSourceService,
             IEventAggregator eventAggregator) {
-            _storageService = storageService;
+            _gamesService = gamesService;
             _flyoutService = flyoutService;
             IsSearchReady = gameSourceService.IsReady;
 
@@ -52,7 +52,7 @@ namespace ShIBANG.ViewModels {
         }
 
         public IEnumerable<Game> Games {
-            get { return _storageService.Games; }
+            get { return _gamesService.Games; }
         }
 
         public ICommand AddGame {
@@ -77,6 +77,15 @@ namespace ShIBANG.ViewModels {
             get { return GetCommand ("RemoveGame", ExecuteRemoveGame, CanExecuteRemoveGame); }
         }
 
+        public void SaveGame (Game game) {
+            if (game == null) {
+                return;
+            }
+
+            game.LastUpdated = DateTime.UtcNow;
+            //_gamesService.SaveGames ();
+        }
+
         private void ExecuteAddGame () {
             _flyoutService.ShowFlyout ("AddGame", App.Current.Container.GetInstance<AddGameView> (), width: 450);
         }
@@ -85,7 +94,7 @@ namespace ShIBANG.ViewModels {
             var res = MessageBox.Show (String.Format ("Are you sure you want to remove {0} from your game list?", SelectedGame.Name), "Remove Game",
                 MessageBoxButton.YesNo, MessageBoxImage.Warning);
             if (res == MessageBoxResult.Yes) {
-                _storageService.Games.Remove (SelectedGame);
+                _gamesService.Games.Remove (SelectedGame);
             }
         }
 

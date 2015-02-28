@@ -26,8 +26,17 @@
 
 #endregion
 
+using System.Collections.Generic;
+
 namespace ShIBANG.Models {
-    public class Category {
-        public string Name { get; set; }
-    }
+	public class Category {
+		public Category () {
+			Games = new HashSet<Game> ();
+		}
+
+		public long Id { get; set; }
+		public string Name { get; set; }
+
+		public virtual ICollection<Game> Games { get; set; }
+	}
 }

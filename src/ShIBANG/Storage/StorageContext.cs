@@ -35,24 +35,36 @@ using System.Reflection;
 using ShIBANG.Models;
 
 namespace ShIBANG.Storage {
-    public class SqliteConfiguration : DbConfiguration {
-        public SqliteConfiguration () {
-            SetDefaultConnectionFactory (new SqliteConnectionFactory ());
-            SetProviderFactory ("System.Data.SQLite", SQLiteFactory.Instance);
-            SetProviderFactory ("System.Data.SQLite.EF6", SQLiteProviderFactory.Instance);
-            var t = Type.GetType ("System.Data.SQLite.EF6.SQLiteProviderServices, System.Data.SQLite.EF6");
-            var fi = t.GetField ("Instance", BindingFlags.NonPublic | BindingFlags.Static);
-            SetProviderServices ("System.Data.SQLite", (DbProviderServices) fi.GetValue (null));
-        }
-    }
+	public class SqliteConfiguration : DbConfiguration {
+		public SqliteConfiguration () {
+			SetDefaultConnectionFactory (new SqliteConnectionFactory ());
+			SetProviderFactory ("System.Data.SQLite", SQLiteFactory.Instance);
+			SetProviderFactory ("System.Data.SQLite.EF6", SQLiteProviderFactory.Instance);
+			var t = Type.GetType ("System.Data.SQLite.EF6.SQLiteProviderServices, System.Data.SQLite.EF6");
+			var fi = t.GetField ("Instance", BindingFlags.NonPublic | BindingFlags.Static);
+			SetProviderServices ("System.Data.SQLite", (DbProviderServices) fi.GetValue (null));
+		}
+	}
 
-    [DbConfigurationType (typeof (SqliteConfiguration))]
-    public class StorageContext : DbContext {
-        public StorageContext (string connectionString)
-            : base (connectionString) {
-            Database.SetInitializer<StorageContext> (null);
-        }
+	[DbConfigurationType (typeof (SqliteConfiguration))]
+	public class StorageContext : DbContext {
+		public StorageContext (string connectionString)
+			: base (connectionString) {
+			Database.SetInitializer<StorageContext> (null);
+		}
 
-        public DbSet<Game> Games { get; set; }
-    }
+		public DbSet<Game> Games { get; set; }
+
+		protected override void OnModelCreating (DbModelBuilder modelBuilder) {
+			modelBuilder.Entity<Game> ()
+			            .HasMany (g => g.Categories)
+			            .WithMany (c => c.Games)
+			            .Map (
+				            m => {
+					            m.MapLeftKey ("GameId");
+					            m.MapRightKey ("CategoryId");
+					            m.ToTable ("GameCategories");
+				            });
+		}
+	}
 }

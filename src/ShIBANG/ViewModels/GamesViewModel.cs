@@ -83,7 +83,7 @@ namespace ShIBANG.ViewModels {
             }
 
             game.LastUpdated = DateTime.UtcNow;
-            //_gamesService.SaveGames ();
+	        _gamesService.CommitAsync ();
         }
 
         private void ExecuteAddGame () {
@@ -91,7 +91,7 @@ namespace ShIBANG.ViewModels {
         }
 
         private void ExecuteRemoveGame () {
-            var res = MessageBox.Show (String.Format ("Are you sure you want to remove {0} from your game list?", SelectedGame.Name), "Remove Game",
+            var res = MessageBox.Show (String.Format ("Are you sure you want to remove {0} from your game library?", SelectedGame.Name), "Remove Game",
                 MessageBoxButton.YesNo, MessageBoxImage.Warning);
             if (res == MessageBoxResult.Yes) {
                 _gamesService.Games.Remove (SelectedGame);

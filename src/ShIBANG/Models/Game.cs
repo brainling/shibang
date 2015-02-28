@@ -27,30 +27,35 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 
 namespace ShIBANG.Models {
-    public class Game : ModelBase {
-        private float _completionPercent;
+	public class Game : ModelBase {
+		private float _completionPercent;
 
-        public Game () {
-            IsActivelyPlaying = true;
-        }
+		public Game () {
+			IsActivelyPlaying = true;
+			LastUpdated = DateTime.UtcNow;
+			Categories = new HashSet<Category> ();
+		}
 
-        public float CompletionPercent {
-            get { return _completionPercent; }
-            set { SetProperty (ref _completionPercent, value); }
-        }
+		public float CompletionPercent {
+			get { return _completionPercent; }
+			set { SetProperty (ref _completionPercent, value); }
+		}
 
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public bool IsActivelyPlaying { get; set; }
-        public bool IsPersistent { get; set; }
-        public int Rating { get; set; }
-        public int GiantBombId { get; set; }
-        public string GiantBombUrl { get; set; }
-        public string SteamId { get; set; }
-        public string ThumbnailImageUrl { get; set; }
-        public string MediumImageUrl { get; set; }
-        public DateTime LastUpdated { get; set; }
-    }
+		public long Id { get; set; }
+		public string Name { get; set; }
+		public bool IsActivelyPlaying { get; set; }
+		public bool IsPersistent { get; set; }
+		public float Rating { get; set; }
+		public int GiantBombId { get; set; }
+		public string GiantBombUrl { get; set; }
+		public string SteamId { get; set; }
+		public string ThumbnailImageUrl { get; set; }
+		public string MediumImageUrl { get; set; }
+		public DateTime LastUpdated { get; set; }
+
+		public virtual ICollection<Category> Categories { get; set; }
+	}
 }

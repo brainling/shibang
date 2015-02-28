@@ -153,19 +153,17 @@ namespace ShIBANG.Controls {
         }
 
         private Task FindGameAsync (string name) {
-            return App.Current.Container.GetInstance<IGameSourceService> ().FindAsync (name)
-                      .ContinueWith (r => {
-                          Dispatcher.Invoke (() => {
-                              _searchTask = null;
-                              SearchResults = new ObservableCollection<GameResult> (r.Result);
-                              if (!QueuedSearch) {
-                                  return;
-                              }
+	        return App.Current.Container.GetInstance<IGameSourceService> ().FindAsync (name)
+	                  .ContinueWith (r => Dispatcher.Invoke (() => {
+		                  _searchTask = null;
+		                  SearchResults = new ObservableCollection<GameResult> (r.Result);
+		                  if (!QueuedSearch) {
+			                  return;
+		                  }
 
-                              QueuedSearch = false;
-                              _searchTask = FindGameAsync (Text);
-                          });
-                      });
+		                  QueuedSearch = false;
+		                  _searchTask = FindGameAsync (Text);
+	                  }));
         }
 
         public static readonly DependencyProperty SelectedGameThumbnailUrlProperty = DependencyProperty.Register (

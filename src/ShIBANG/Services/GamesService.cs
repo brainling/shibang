@@ -31,56 +31,69 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.Practices.Prism.PubSubEvents;
 using ShIBANG.Models;
 
 namespace ShIBANG.Services {
-    public interface IGamesService {
-        IList<Game> Games { get; }
-    }
+	public interface IGamesService {
+		IList<Game> Games { get; }
+		Task CommitAsync ();
+	}
 
-    public class GamesService : IGamesService {
-        private ObservableCollection<Game> _games;
-        private readonly IStorageService _storageService;
-        private IEventAggregator _eventAggregator;
+	public class GamesService : IGamesService {
+		private readonly IEventAggregator _eventAggregator;
+		private readonly IStorageService _storageService;
+		private ObservableCollection<Game> _games;
 
-        public GamesService (IStorageService storageService, IEventAggregator eventAggregator) {
-            _storageService = storageService;
-            _eventAggregator = eventAggregator;
-        }
+		public GamesService (IStorageService storageService, IEventAggregator eventAggregator) {
+			_storageService = storageService;
+			_eventAggregator = eventAggregator;
+		}
 
-        public IList<Game> Games {
-            get { return _games ?? (_games = LoadGames ()); }
-        }
+		public IList<Game> Games {
+			get { return _games ?? (_games = LoadGames ()); }
+		}
 
-        private ObservableCollection<Game> LoadGames () {
-            var games = new ObservableCollection<Game> (_storageService.LoadObjects<Game> ());
-            games.CollectionChanged += GamesCollectionChanged;
-            foreach (var game in games) {
-                game.PropertyChanged += GameStateChanged;
-            }
+		public Task CommitAsync () {
+			return _storageService.CommitAsync ();
+		}
 
-            return games;
-        }
+		private ObservableCollection<Game> LoadGames () {
+			var games = new ObservableCollection<Game> (_storageService.LoadObjects<Game> ());
+			games.CollectionChanged += GamesCollectionChanged;
+			foreach (var game in games) {
+				game.PropertyChanged += GameStateChanged;
+			}
 
-        private void GameStateChanged (object sender, PropertyChangedEventArgs e) {
-            if (e.PropertyName == "CompletionPercent") {
-                _eventAggregator.GetEvent<GameCompletionUpdated> ().Publish ((Game) sender);
-            }
-        }
+			return games;
+		}
 
-        private void GamesCollectionChanged (object sender, NotifyCollectionChangedEventArgs e) {
-            _storageService.SaveObjects (_games);
-            _eventAggregator.GetEvent<GameListUpdated> ().Publish (Events.EmptyArg);
-            switch (e.Action) {
-                case NotifyCollectionChangedAction.Add:
-                    e.NewItems.OfType<Game> ().ToList ().ForEach (g => g.PropertyChanged += GameStateChanged);
-                    break;
+		private void GameStateChanged (object sender, PropertyChangedEventArgs e) {
+			if (e.PropertyName == "CompletionPercent") {
+				_eventAggregator.GetEvent<GameCompletionUpdated> ().Publish ((Game) sender);
+			}
+		}
 
-                case NotifyCollectionChangedAction.Remove:
-                    e.OldItems.OfType<Game> ().ToList ().ForEach (g => g.PropertyChanged -= GameStateChanged);
-                    break;
-            }
-        }
-    }
+		private void GamesCollectionChanged (object sender, NotifyCollectionChangedEventArgs e) {
+			_eventAggregator.GetEvent<GameListUpdated> ().Publish (Events.EmptyArg);
+			switch (e.Action) {
+				case NotifyCollectionChangedAction.Add:
+					e.NewItems.OfType<Game> ().ToList ().ForEach (g => {
+						g.PropertyChanged += GameStateChanged;
+						_storageService.AddObject (g);
+					});
+					break;
+
+				case NotifyCollectionChangedAction.Remove:
+					e.OldItems.OfType<Game> ().ToList ().ForEach (g => {
+						g.PropertyChanged -= GameStateChanged;
+						_storageService.RemoveObject (g);
+					});
+					break;
+			}
+
+			_storageService.CommitAsync ();
+		}
+	}
 }
